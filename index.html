@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Monocromático</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+
+        :root {
+            --bg-color: #121212;
+            --text-main: #e0e0e0;
+            --text-muted: #757575;
+            --accent: #ffffff;
+            --shadow-light: rgba(255, 255, 255, 0.05);
+            --shadow-dark: rgba(0, 0, 0, 0.8);
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 3D Neumorphism Utils */
+        .neo-box {
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), 
+                       -6px -6px 12px var(--shadow-light);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .neo-inset {
+            background: var(--bg-color);
+            border-radius: 10px;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), 
+                        inset -4px -4px 8px var(--shadow-light);
+            padding: 12px;
+            border: none;
+            color: var(--text-main);
+            width: 100%;
+            outline: none;
+        }
+
+        .neo-button {
+            background: var(--bg-color);
+            border-radius: 10px;
+            box-shadow: 4px 4px 8px var(--shadow-dark), 
+                       -4px -4px 8px var(--shadow-light);
+            color: var(--accent);
+            border: none;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .neo-button:active {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), 
+                        inset -4px -4px 8px var(--shadow-light);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 430px; /* iPhone Pro Max width approximation */
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            width: 100%;
+            z-index: 10;
+        }
+
+        /* Header / Profile */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .avatar-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .profile-info input {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            outline: none;
+            width: 100%;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            opacity: 0.5;
+        }
+
+        .tab.active {
+            opacity: 1;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), 
+                        inset -4px -4px 8px var(--shadow-light);
+        }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Finance Section */
+        .balance-display {
+            text-align: center;
+        }
+        .balance-display h2 { font-size: 1rem; color: var(--text-muted); font-weight: 300;}
+        .balance-display .amount { font-size: 2.5rem; font-weight: 700; margin: 10px 0; }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .transaction-list {
+            margin-top: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .t-info span { display: block; }
+        .t-title { font-weight: 600; font-size: 0.95rem;}
+        .t-cat { font-size: 0.75rem; color: var(--text-muted); }
+        .t-val.pos { color: #ffffff; }
+        .t-val.neg { color: #888888; }
+
+        /* Inventory / Loadout Section */
+        .loadout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .slot {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+        
+        .slot-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-radius: 8px;
+            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+        }
+
+        .slot-details { flex: 1; }
+        .slot-details input { margin-bottom: 5px; font-size: 0.9rem; font-weight: 600; }
+        .slot-details .category { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Waves Animation */
+        .ocean {
+            height: 60px; /* Configuração para o rodapé */
+            width: 100%;
+            position: relative;
+            bottom: 0;
+            left: 0;
+            background: transparent;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .wave {
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%231a1a1a"/%3E%3C/svg%3E');
+            position: absolute;
+            width: 200%;
+            height: 100%;
+            animation: wave 10s -3s linear infinite;
+            transform: translate3d(0, 0, 0);
+            opacity: 0.8;
+        }
+
+        .wave:nth-of-type(2) {
+            bottom: 0;
+            animation: wave 18s linear reverse infinite;
+            opacity: 0.5;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%232a2a2a"/%3E%3C/svg%3E');
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.7rem;
+            color: #444;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer strong { color: #666; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="avatar-container" onclick="changeAvatar()">
+            <img id="profile-img" src="https://i.pravatar.cc/150?img=33" alt="Avatar">
+        </div>
+        <div class="profile-info">
+            <h1 contenteditable="true" spellcheck="false">p1nkill</h1>
+            <input type="text" placeholder="Adicionar status ou ID..." value="Operativo Nível 1">
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="neo-button tab active" onclick="switchTab('finance')">Logística</button>
+        <button class="neo-button tab" onclick="switchTab('loadout')">Conjuntos</button>
+    </div>
+
+    <div id="finance" class="view active">
+        <div class="neo-box balance-display">
+            <h2>Fundo Operacional</h2>
+            <div class="amount">R$ <span id="current-balance">0.00</span></div>
+        </div>
+
+        <div class="neo-box">
+            <div class="form-group">
+                <label>Descrição do Gasto/Ganho</label>
+                <input type="text" id="desc" class="neo-inset" placeholder="Ex: Munição, Suplemento...">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Valor (R$)</label>
+                    <input type="number" id="val" class="neo-inset" placeholder="0.00">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Qtd / Local</label>
+                    <input type="text" id="qtd" class="neo-inset" placeholder="Ex: 2x / Loja">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="neo-button" style="flex: 1; background: rgba(255,255,255,0.05);" onclick="addTransaction('income')">+ Entrada</button>
+                <button class="neo-button" style="flex: 1;" onclick="addTransaction('expense')">- Saída</button>
+            </div>
+        </div>
+
+        <div class="neo-box">
+            <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Relatório Mensal</label>
+            <div class="transaction-list" id="t-list">
+                </div>
+        </div>
+    </div>
+
+    <div id="loadout" class="view">
+        <div class="neo-box">
+            <div class="loadout-header">
+                <input type="text" class="neo-inset" value="Loadout Tático 01" style="width: 60%; font-weight: bold;">
+                <button class="neo-button" onclick="alert('Conjunto Salvo com Sucesso no banco de dados.')">Salvar</button>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px;">Alterne os itens equipados abaixo:</p>
+
+            <div class="slot neo-box" style="padding: 10px; margin-bottom: 10px; box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);">
+                <div class="slot-icon">HEAD</div>
+                <div class="slot-details">
+                    <input type="text" class="neo-inset" value="Óculos de Visão Noturna" style="background: transparent; box-shadow: none; padding: 0;">
+                    <div class="category">Categoria: Equipamento / Valor: R$ 850</div>
+                </div>
+            </div>
+
+            <div class="slot neo-box" style="padding: 10px; margin-bottom: 10px; box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);">
+                <div class="slot-icon">BODY</div>
+                <div class="slot-details">
+                    <input type="text" class="neo-inset" value="Jaqueta de Couro Noir" style="background: transparent; box-shadow: none; padding: 0;">
+                    <div class="category">Categoria: Vestuário / Valor: R$ 320</div>
+                </div>
+            </div>
+
+            <div class="slot neo-box" style="padding: 10px; margin-bottom: 10px; box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);">
+                <div class="slot-icon">FEET</div>
+                <div class="slot-details">
+                    <input type="text" class="neo-inset" value="Bota da Adidas Terrex" style="background: transparent; box-shadow: none; padding: 0;">
+                    <div class="category">Categoria: Calçado Tático / Valor: R$ 900</div>
+                </div>
+            </div>
+
+            <button class="neo-button" style="width: 100%; margin-top: 10px;" onclick="alert('Criando novo slot no array...')">+ Criar Novo Conjunto</button>
+        </div>
+    </div>
+</div>
+
+<div class="ocean">
+    <div class="wave"></div>
+    <div class="wave"></div>
+</div>
+<div class="footer">
+    Powered by <strong>Pegasus Framework</strong>
+</div>
+
+<script>
+    // Gerenciamento de abas
+    function switchTab(tabId) {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // Gerenciamento de avatar
+    function changeAvatar() {
+        const url = prompt("Cole o link da nova imagem de perfil:");
+        if (url) {
+            document.getElementById('profile-img').src = url;
+        }
+    }
+
+    // Lógica Financeira Simples
+    let balance = 0.00;
+
+    function addTransaction(type) {
+        const desc = document.getElementById('desc').value;
+        const valInput = document.getElementById('val').value;
+        const qtd = document.getElementById('qtd').value;
+        const val = parseFloat(valInput);
+
+        if(!desc || isNaN(val)) {
+            alert("Preencha a descrição e o valor numérico.");
+            return;
+        }
+
+        if(type === 'income') {
+            balance += val;
+        } else {
+            balance -= val;
+        }
+
+        updateBalance();
+
+        // Adicionar na lista HTML
+        const list = document.getElementById('t-list');
+        const item = document.createElement('div');
+        item.className = 'transaction-item';
+        
+        const isPos = type === 'income';
+        const sign = isPos ? '+' : '-';
+        const cssClass = isPos ? 'pos' : 'neg';
+
+        item.innerHTML = `
+            <div class="t-info">
+                <span class="t-title">${desc}</span>
+                <span class="t-cat">${qtd ? qtd : 'Geral'}</span>
+            </div>
+            <div class="t-val ${cssClass}">${sign} R$ ${val.toFixed(2)}</div>
+        `;
+        
+        // Insere no topo
+        list.insertBefore(item, list.firstChild);
+
+        // Limpa campos
+        document.getElementById('desc').value = '';
+        document.getElementById('val').value = '';
+        document.getElementById('qtd').value = '';
+    }
+
+    function updateBalance() {
+        document.getElementById('current-balance').innerText = balance.toFixed(2);
+    }
+</script>
+
+</body>
+</html>

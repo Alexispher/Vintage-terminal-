@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Monocromático</title>
+    <title>Dashboard Monocromático Tático</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
             --bg-color: #121212;
@@ -70,6 +70,9 @@
             text-transform: uppercase;
             font-size: 0.85rem;
             letter-spacing: 1px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .neo-button:active {
@@ -77,9 +80,15 @@
                         inset -4px -4px 8px var(--shadow-light);
         }
 
+        .neo-button-danger {
+            color: #ff5555;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+        }
+
         /* Layout */
         .container {
-            max-width: 430px; /* iPhone Pro Max width approximation */
+            max-width: 430px;
             margin: 0 auto;
             padding: 20px;
             flex: 1;
@@ -102,6 +111,7 @@
             border: 2px solid var(--accent);
             overflow: hidden;
             box-shadow: 0 0 15px rgba(255,255,255,0.1);
+            cursor: pointer;
         }
 
         .avatar-container img {
@@ -136,6 +146,8 @@
             flex: 1;
             text-align: center;
             opacity: 0.5;
+            padding: 10px 5px;
+            font-size: 0.75rem;
         }
 
         .tab.active {
@@ -146,45 +158,72 @@
 
         /* Views */
         .view { display: none; }
-        .view.active { display: block; animation: fadeIn 0.4s ease; }
+        .view.active { display: block; animation: fadeIn 0.3s ease; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Finance Section */
-        .balance-display {
+        /* Terminal & Neofetch Section */
+        .terminal-block {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #8be9fd; /* Azul terminal clássico */
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        .terminal-block .sys-key { color: var(--text-main); font-weight: bold; }
+        .terminal-block .sys-val { color: var(--text-muted); }
+
+        /* Calendar Grid */
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
             text-align: center;
         }
-        .balance-display h2 { font-size: 1rem; color: var(--text-muted); font-weight: 300;}
-        .balance-display .amount { font-size: 2.5rem; font-weight: 700; margin: 10px 0; }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.8rem;
+        .cal-day-name {
+            font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
+            margin-bottom: 5px;
         }
 
-        .transaction-list {
-            margin-top: 20px;
-            max-height: 250px;
-            overflow-y: auto;
+        .cal-day {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            padding: 8px 0;
+            border-radius: 6px;
         }
 
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
+        .cal-day.today {
+            background: var(--text-main);
+            color: var(--bg-color);
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
 
+        /* Finance Section */
+        .balance-display { text-align: center; }
+        .balance-display h2 { font-size: 1rem; color: var(--text-muted); font-weight: 300;}
+        .balance-display .amount { font-size: 2.5rem; font-weight: 700; margin: 10px 0; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+        .transaction-list { margin-top: 20px; max-height: 250px; overflow-y: auto; }
+        .transaction-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
         .t-info span { display: block; }
         .t-title { font-weight: 600; font-size: 0.95rem;}
         .t-cat { font-size: 0.75rem; color: var(--text-muted); }
@@ -192,83 +231,25 @@
         .t-val.neg { color: #888888; }
 
         /* Inventory / Loadout Section */
-        .loadout-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .slot {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 15px;
-        }
-        
-        .slot-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            border-radius: 8px;
-            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
-        }
-
+        .loadout-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .slot { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding: 15px; }
+        .slot-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted); border-radius: 8px; box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light); font-weight: bold;}
         .slot-details { flex: 1; }
         .slot-details input { margin-bottom: 5px; font-size: 0.9rem; font-weight: 600; }
         .slot-details .category { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
 
+        /* Add Item Form */
+        .add-item-form { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #333; }
+        .add-item-form.active { display: block; }
+
         /* Waves Animation */
-        .ocean {
-            height: 60px; /* Configuração para o rodapé */
-            width: 100%;
-            position: relative;
-            bottom: 0;
-            left: 0;
-            background: transparent;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .wave {
-            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%231a1a1a"/%3E%3C/svg%3E');
-            position: absolute;
-            width: 200%;
-            height: 100%;
-            animation: wave 10s -3s linear infinite;
-            transform: translate3d(0, 0, 0);
-            opacity: 0.8;
-        }
-
-        .wave:nth-of-type(2) {
-            bottom: 0;
-            animation: wave 18s linear reverse infinite;
-            opacity: 0.5;
-            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%232a2a2a"/%3E%3C/svg%3E');
-        }
-
-        @keyframes wave {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+        .ocean { height: 60px; width: 100%; position: relative; bottom: 0; left: 0; background: transparent; overflow: hidden; z-index: 1; }
+        .wave { background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%231a1a1a"/%3E%3C/svg%3E'); position: absolute; width: 200%; height: 100%; animation: wave 10s -3s linear infinite; transform: translate3d(0, 0, 0); opacity: 0.8; }
+        .wave:nth-of-type(2) { bottom: 0; animation: wave 18s linear reverse infinite; opacity: 0.5; background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%232a2a2a"/%3E%3C/svg%3E'); }
+        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         /* Footer */
-        .footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 0.7rem;
-            color: #444;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            position: relative;
-            z-index: 10;
-        }
-
+        .footer { text-align: center; padding: 15px; font-size: 0.7rem; color: #444; letter-spacing: 2px; text-transform: uppercase; position: relative; z-index: 10; }
         .footer strong { color: #666; font-weight: 700; }
     </style>
 </head>
@@ -281,16 +262,37 @@
         </div>
         <div class="profile-info">
             <h1 contenteditable="true" spellcheck="false">p1nkill</h1>
-            <input type="text" placeholder="Adicionar status ou ID..." value="Operativo Nível 1">
+            <input type="text" placeholder="Adicionar status..." value="Operativo Nível 1">
         </div>
     </div>
 
     <div class="tabs">
-        <button class="neo-button tab active" onclick="switchTab('finance')">Logística</button>
+        <button class="neo-button tab active" onclick="switchTab('terminal')">Terminal</button>
+        <button class="neo-button tab" onclick="switchTab('finance')">Logística</button>
         <button class="neo-button tab" onclick="switchTab('loadout')">Conjuntos</button>
     </div>
 
-    <div id="finance" class="view active">
+    <div id="terminal" class="view active">
+        <div class="neo-box">
+            <div class="terminal-block">
+    _     _      <span class="sys-key">p1nkill</span>@<span class="sys-key">Pegasus-OS</span>
+   / \   / \     -------------------
+  /   \_/   \    <span class="sys-key">OS:</span> <span class="sys-val">Tactical Linux 26.5</span>
+ /           \   <span class="sys-key">Host:</span> <span class="sys-val">DevTerm A06</span>
+/_____________\  <span class="sys-key">Uptime:</span> <span class="sys-val" id="uptime">0h 15m</span>
+                 <span class="sys-key">Mem:</span> <span class="sys-val">543MiB / 3863MiB</span>
+                 <span class="sys-key">Disk:</span> <span class="sys-val">101 GB / 254 GB</span>
+            </div>
+        </div>
+
+        <div class="neo-box">
+            <div class="calendar-header" id="month-year"></div>
+            <div class="calendar-grid" id="calendar-days">
+                </div>
+        </div>
+    </div>
+
+    <div id="finance" class="view">
         <div class="neo-box balance-display">
             <h2>Fundo Operacional</h2>
             <div class="amount">R$ <span id="current-balance">0.00</span></div>
@@ -319,8 +321,7 @@
 
         <div class="neo-box">
             <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Relatório Mensal</label>
-            <div class="transaction-list" id="t-list">
-                </div>
+            <div class="transaction-list" id="t-list"></div>
         </div>
     </div>
 
@@ -328,35 +329,37 @@
         <div class="neo-box">
             <div class="loadout-header">
                 <input type="text" class="neo-inset" value="Loadout Tático 01" style="width: 60%; font-weight: bold;">
-                <button class="neo-button" onclick="alert('Conjunto Salvo com Sucesso no banco de dados.')">Salvar</button>
+                <button class="neo-button" onclick="alert('Conjunto Salvo!')">Salvar</button>
             </div>
-            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px;">Alterne os itens equipados abaixo:</p>
-
-            <div class="slot neo-box" style="padding: 10px; margin-bottom: 10px; box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);">
-                <div class="slot-icon">HEAD</div>
-                <div class="slot-details">
-                    <input type="text" class="neo-inset" value="Óculos de Visão Noturna" style="background: transparent; box-shadow: none; padding: 0;">
-                    <div class="category">Categoria: Equipamento / Valor: R$ 850</div>
+            
+            <div id="loadout-container">
                 </div>
-            </div>
 
-            <div class="slot neo-box" style="padding: 10px; margin-bottom: 10px; box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);">
-                <div class="slot-icon">BODY</div>
-                <div class="slot-details">
-                    <input type="text" class="neo-inset" value="Jaqueta de Couro Noir" style="background: transparent; box-shadow: none; padding: 0;">
-                    <div class="category">Categoria: Vestuário / Valor: R$ 320</div>
+            <button class="neo-button" style="width: 100%; margin-top: 10px;" onclick="toggleAddItemForm()">+ Equipar Novo Item</button>
+            
+            <div class="add-item-form" id="add-form">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">SLOT (Ex: ARMA, CORPO)</label>
+                        <input type="text" id="new-slot" class="neo-inset" placeholder="SLOT">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">NOME DO ITEM</label>
+                        <input type="text" id="new-name" class="neo-inset" placeholder="Nome">
+                    </div>
                 </div>
-            </div>
-
-            <div class="slot neo-box" style="padding: 10px; margin-bottom: 10px; box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);">
-                <div class="slot-icon">FEET</div>
-                <div class="slot-details">
-                    <input type="text" class="neo-inset" value="Bota da Adidas Terrex" style="background: transparent; box-shadow: none; padding: 0;">
-                    <div class="category">Categoria: Calçado Tático / Valor: R$ 900</div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 2;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">CATEGORIA</label>
+                        <input type="text" id="new-cat" class="neo-inset" placeholder="Categoria">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">VALOR</label>
+                        <input type="number" id="new-price" class="neo-inset" placeholder="R$">
+                    </div>
                 </div>
+                <button class="neo-button" style="width: 100%; background: #222;" onclick="addNewItem()">Adicionar ao Loadout</button>
             </div>
-
-            <button class="neo-button" style="width: 100%; margin-top: 10px;" onclick="alert('Criando novo slot no array...')">+ Criar Novo Conjunto</button>
         </div>
     </div>
 </div>
@@ -370,7 +373,7 @@
 </div>
 
 <script>
-    // Gerenciamento de abas
+    // --- NAVEGAÇÃO DE ABAS ---
     function switchTab(tabId) {
         document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -379,15 +382,107 @@
         event.target.classList.add('active');
     }
 
-    // Gerenciamento de avatar
     function changeAvatar() {
         const url = prompt("Cole o link da nova imagem de perfil:");
-        if (url) {
-            document.getElementById('profile-img').src = url;
-        }
+        if (url) document.getElementById('profile-img').src = url;
     }
 
-    // Lógica Financeira Simples
+    // --- UPTIME SIMULATOR ---
+    let minutes = 15;
+    setInterval(() => {
+        minutes++;
+        let h = Math.floor(minutes / 60);
+        let m = minutes % 60;
+        document.getElementById('uptime').innerText = `${h}h ${m}m`;
+    }, 60000);
+
+    // --- CALENDÁRIO O-LED STYLE ---
+    function renderCalendar() {
+        const date = new Date();
+        const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+        
+        document.getElementById('month-year').innerText = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+        
+        const grid = document.getElementById('calendar-days');
+        grid.innerHTML = '';
+        
+        // Headers dos dias
+        dayNames.forEach(day => {
+            grid.innerHTML += `<div class="cal-day-name">${day}</div>`;
+        });
+
+        const firstDayIndex = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        
+        // Espaços vazios
+        for (let i = 0; i < firstDayIndex; i++) {
+            grid.innerHTML += `<div></div>`;
+        }
+
+        // Dias do mês
+        for (let i = 1; i <= lastDay; i++) {
+            const isToday = i === date.getDate() ? 'today' : '';
+            grid.innerHTML += `<div class="cal-day ${isToday}">${i}</div>`;
+        }
+    }
+    renderCalendar();
+
+    // --- SISTEMA DE LOADOUT DINÂMICO ---
+    let loadoutItems = [
+        { slot: 'CABEÇA', name: 'Óculos de Visão Noturna', category: 'Equipamento Tático', price: 850 },
+        { slot: 'CORPO', name: 'Vestido Tático Vermelho', category: 'Traje de Combate', price: 3500 },
+        { slot: 'ARMA', name: 'Grapple Gun', category: 'Mobilidade', price: 1200 }
+    ];
+
+    function renderLoadout() {
+        const container = document.getElementById('loadout-container');
+        container.innerHTML = '';
+
+        loadoutItems.forEach((item, index) => {
+            container.innerHTML += `
+                <div class="slot neo-box" style="padding: 10px; margin-bottom: 10px; box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);">
+                    <div class="slot-icon">${item.slot.substring(0,4)}</div>
+                    <div class="slot-details">
+                        <input type="text" class="neo-inset" value="${item.name}" style="background: transparent; box-shadow: none; padding: 0;">
+                        <div class="category">Cat: ${item.category} / Valor: R$ ${item.price}</div>
+                    </div>
+                    <button class="neo-button neo-button-danger" onclick="deleteItem(${index})">X</button>
+                </div>
+            `;
+        });
+    }
+
+    function deleteItem(index) {
+        loadoutItems.splice(index, 1);
+        renderLoadout();
+    }
+
+    function toggleAddItemForm() {
+        document.getElementById('add-form').classList.toggle('active');
+    }
+
+    function addNewItem() {
+        const slot = document.getElementById('new-slot').value.toUpperCase() || 'ITEM';
+        const name = document.getElementById('new-name').value || 'Item Desconhecido';
+        const cat = document.getElementById('new-cat').value || 'Geral';
+        const price = document.getElementById('new-price').value || 0;
+
+        loadoutItems.push({ slot, name, category: cat, price });
+        renderLoadout();
+        
+        // Limpar e fechar
+        document.getElementById('new-slot').value = '';
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-cat').value = '';
+        document.getElementById('new-price').value = '';
+        toggleAddItemForm();
+    }
+    
+    // Iniciar renderização do loadout
+    renderLoadout();
+
+    // --- LOGÍSTICA / FINANÇAS ---
     let balance = 0.00;
 
     function addTransaction(type) {
@@ -396,27 +491,17 @@
         const qtd = document.getElementById('qtd').value;
         const val = parseFloat(valInput);
 
-        if(!desc || isNaN(val)) {
-            alert("Preencha a descrição e o valor numérico.");
-            return;
-        }
+        if(!desc || isNaN(val)) { alert("Preencha a descrição e o valor numérico."); return; }
 
-        if(type === 'income') {
-            balance += val;
-        } else {
-            balance -= val;
-        }
+        balance += type === 'income' ? val : -val;
+        document.getElementById('current-balance').innerText = balance.toFixed(2);
 
-        updateBalance();
-
-        // Adicionar na lista HTML
         const list = document.getElementById('t-list');
         const item = document.createElement('div');
         item.className = 'transaction-item';
         
-        const isPos = type === 'income';
-        const sign = isPos ? '+' : '-';
-        const cssClass = isPos ? 'pos' : 'neg';
+        const sign = type === 'income' ? '+' : '-';
+        const cssClass = type === 'income' ? 'pos' : 'neg';
 
         item.innerHTML = `
             <div class="t-info">
@@ -425,18 +510,11 @@
             </div>
             <div class="t-val ${cssClass}">${sign} R$ ${val.toFixed(2)}</div>
         `;
-        
-        // Insere no topo
         list.insertBefore(item, list.firstChild);
 
-        // Limpa campos
         document.getElementById('desc').value = '';
         document.getElementById('val').value = '';
         document.getElementById('qtd').value = '';
-    }
-
-    function updateBalance() {
-        document.getElementById('current-balance').innerText = balance.toFixed(2);
     }
 </script>
 

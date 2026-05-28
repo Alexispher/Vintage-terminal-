@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Tático iOS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #000000;
+            --box-bg: #121212;
+            --text-main: #e0e0e0;
+            --text-muted: #757575;
+            --accent: #ffffff;
+            --shadow-light: rgba(255, 255, 255, 0.05);
+            --shadow-dark: rgba(0, 0, 0, 0.8);
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Utils */
+        .neo-box {
+            background: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #222;
+        }
+
+        .neo-inset {
+            background: #0a0a0a;
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #333;
+            color: var(--text-main);
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .neo-inset:focus {
+            border-color: #666;
+        }
+
+        .neo-button {
+            background: #1a1a1a;
+            border-radius: 10px;
+            color: var(--accent);
+            border: 1px solid #333;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .neo-button:active {
+            background: #2a2a2a;
+            transform: scale(0.98);
+        }
+
+        .neo-button-danger {
+            color: #ff5555;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            border-color: #4a1111;
+            background: #1a0505;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            width: 100%;
+            z-index: 10;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .avatar-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .profile-info input {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            outline: none;
+            width: 100%;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            opacity: 0.5;
+            padding: 10px 5px;
+            font-size: 0.75rem;
+            min-width: 80px;
+            border: none;
+        }
+
+        .tab.active {
+            opacity: 1;
+            background: #222;
+            border: 1px solid #444;
+        }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Terminal Apple */
+        .terminal-block {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.70rem;
+            color: #8be9fd;
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        .sys-key { color: var(--text-main); font-weight: bold; }
+        .sys-val { color: var(--text-muted); }
+
+        /* Calendar */
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .cal-day-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .cal-day {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            padding: 8px 0;
+            border-radius: 6px;
+        }
+
+        .cal-day.today {
+            background: var(--text-main);
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+
+        /* Finance */
+        .balance-display { text-align: center; }
+        .balance-display h2 { font-size: 1rem; color: var(--text-muted); font-weight: 300;}
+        .balance-display .amount { font-size: 2.5rem; font-weight: 700; margin: 10px 0; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+        .transaction-list { margin-top: 20px; max-height: 250px; overflow-y: auto; }
+        .transaction-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
+        .t-info span { display: block; }
+        .t-title { font-weight: 600; font-size: 0.95rem;}
+        .t-cat { font-size: 0.75rem; color: var(--text-muted); }
+        .t-val.pos { color: #ffffff; }
+        .t-val.neg { color: #888888; }
+
+        /* Loadout */
+        .slot { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding: 15px; background: #0a0a0a; border-radius: 12px; border: 1px solid #222;}
+        .slot-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted); border-radius: 8px; background: #1a1a1a; font-weight: bold;}
+        .slot-details { flex: 1; }
+        .slot-details input { margin-bottom: 5px; font-size: 0.9rem; font-weight: 600; background: transparent; border: none; color: #fff; width: 100%; outline: none;}
+        .slot-details .category { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .add-item-form { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #333; }
+        .add-item-form.active { display: block; }
+
+        /* Objetivos */
+        .goal-card { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .goal-title { font-weight: 600; font-size: 1rem; }
+        .goal-values { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+        .progress-bg { background: #222; width: 100%; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { background: var(--text-main); height: 100%; transition: width 0.5s ease; }
+
+        /* Footer / Waves */
+        .ocean { height: 60px; width: 100%; position: relative; bottom: 0; left: 0; background: transparent; overflow: hidden; z-index: 1; }
+        .wave { background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%231a1a1a"/%3E%3C/svg%3E'); position: absolute; width: 200%; height: 100%; animation: wave 10s -3s linear infinite; transform: translate3d(0, 0, 0); opacity: 0.8; }
+        .wave:nth-of-type(2) { bottom: 0; animation: wave 18s linear reverse infinite; opacity: 0.5; background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 88.7"%3E%3Cpath d="M800 56.9c-155.5 0-204.9-50-405.5-49.5-200 0-250 49.5-394.5 49.5v31.8h800v-31.8z" fill="%232a2a2a"/%3E%3C/svg%3E'); }
+        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .footer { text-align: center; padding: 15px; font-size: 0.7rem; color: #444; letter-spacing: 2px; text-transform: uppercase; position: relative; z-index: 10; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="avatar-container" onclick="changeAvatar()">
+            <img id="profile-img" src="https://i.pravatar.cc/150?img=33" alt="Avatar">
+        </div>
+        <div class="profile-info">
+            <h1 contenteditable="true" spellcheck="false" id="profile-name">hcaav</h1>
+            <input type="text" placeholder="Adicionar status..." id="profile-status" value="Operativo Nível 1">
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="neo-button tab active" onclick="switchTab('terminal')">Terminal</button>
+        <button class="neo-button tab" onclick="switchTab('finance')">Logística</button>
+        <button class="neo-button tab" onclick="switchTab('goals')">Objetivos</button>
+        <button class="neo-button tab" onclick="switchTab('loadout')">Conjuntos</button>
+    </div>
+
+    <div id="terminal" class="view active">
+        <div class="neo-box">
+            <div class="terminal-block">
+      .:'            <span class="sys-key">hcaav</span>@<span class="sys-key">iPhone</span>
+  __ :'__            -------------------
+.'`__`-'__``.        <span class="sys-key">OS:</span> <span class="sys-val">iOS 26.5</span>
+:__________.-'       <span class="sys-key">Host:</span> <span class="sys-val">iPhone 15</span>
+:_________:          <span class="sys-key">Uptime:</span> <span class="sys-val" id="uptime-display">0h 0m</span>
+ :_________`-;       <span class="sys-key">Memory:</span> <span class="sys-val">5.8 GB / 6 GB</span>
+  `.__.-.__.'        <span class="sys-key">Disk:</span> <span class="sys-val">101 GB / 254 GB</span>
+            </div>
+        </div>
+
+        <div class="neo-box">
+            <div class="calendar-header" id="month-year"></div>
+            <div class="calendar-grid" id="calendar-days"></div>
+        </div>
+    </div>
+
+    <div id="finance" class="view">
+        <div class="neo-box balance-display">
+            <h2>Fundo Operacional</h2>
+            <div class="amount">R$ <span id="current-balance">0.00</span></div>
+        </div>
+
+        <div class="neo-box">
+            <div class="form-group">
+                <label>Descrição do Gasto/Ganho</label>
+                <input type="text" id="desc" class="neo-inset" placeholder="Ex: Pagamento, Munição...">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Valor (R$)</label>
+                    <input type="number" id="val" class="neo-inset" placeholder="0.00">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Categoria</label>
+                    <input type="text" id="qtd" class="neo-inset" placeholder="Ex: Salário / Loja">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="neo-button" style="flex: 1;" onclick="addTransaction('income')">+ Entrada</button>
+                <button class="neo-button" style="flex: 1;" onclick="addTransaction('expense')">- Saída</button>
+            </div>
+        </div>
+
+        <div class="neo-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Histórico</label>
+                <button class="neo-button-danger" onclick="clearTransactions()" style="border: none; padding: 4px 8px;">Limpar</button>
+            </div>
+            <div class="transaction-list" id="t-list"></div>
+        </div>
+    </div>
+
+    <div id="goals" class="view">
+        <div class="neo-box">
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; text-align: center;">
+                O progresso é calculado com base no seu Fundo Operacional atual.
+            </p>
+            
+            <div id="goals-container">
+                </div>
+
+            <button class="neo-button" style="width: 100%; margin-top: 10px;" onclick="toggleGoalForm()">+ Criar Novo Objetivo</button>
+            
+            <div class="add-item-form" id="goal-form">
+                <div class="form-group">
+                    <label>NOME DO OBJETIVO</label>
+                    <input type="text" id="goal-name" class="neo-inset" placeholder="Ex: Entrada Apartamento">
+                </div>
+                <div class="form-group">
+                    <label>VALOR NECESSÁRIO (R$)</label>
+                    <input type="number" id="goal-price" class="neo-inset" placeholder="50000">
+                </div>
+                <button class="neo-button" style="width: 100%;" onclick="addNewGoal()">Salvar Objetivo</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadout" class="view">
+        <div class="neo-box">
+            <div id="loadout-container">
+                </div>
+
+            <button class="neo-button" style="width: 100%; margin-top: 10px;" onclick="toggleAddItemForm()">+ Equipar Novo Item</button>
+            
+            <div class="add-item-form" id="add-form">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">SLOT</label>
+                        <input type="text" id="new-slot" class="neo-inset" placeholder="CABEÇA">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">NOME DO ITEM</label>
+                        <input type="text" id="new-name" class="neo-inset" placeholder="Nome">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 2;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">CATEGORIA</label>
+                        <input type="text" id="new-cat" class="neo-inset" placeholder="Categoria">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted);">VALOR</label>
+                        <input type="number" id="new-price" class="neo-inset" placeholder="R$">
+                    </div>
+                </div>
+                <button class="neo-button" style="width: 100%;" onclick="addNewItem()">Adicionar ao Loadout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ocean">
+    <div class="wave"></div>
+    <div class="wave"></div>
+</div>
+<div class="footer">
+    Powered by <strong>Pegasus Framework</strong>
+</div>
+
+<script>
+    // --- ESTADO GLOBAL (LOCALSTORAGE) ---
+    let balance = parseFloat(localStorage.getItem('hcaav_balance')) || 0.00;
+    let transactions = JSON.parse(localStorage.getItem('hcaav_transactions')) || [];
+    let loadoutItems = JSON.parse(localStorage.getItem('hcaav_loadout')) || [
+        { slot: 'CABEÇA', name: 'Óculos de Visão Noturna', category: 'Equipamento', price: 850 },
+        { slot: 'CORPO', name: 'Vestido Tático Vermelho', category: 'Traje de Combate', price: 3500 },
+        { slot: 'ARMA', name: 'Grapple Gun', category: 'Mobilidade', price: 1200 }
+    ];
+    let goals = JSON.parse(localStorage.getItem('hcaav_goals')) || [
+        { name: 'Entrada Apartamento', target: 50000 }
+    ];
+    let uptimeSeconds = parseInt(localStorage.getItem('hcaav_uptime')) || 0;
+
+    // --- INICIALIZAÇÃO ---
+    function init() {
+        updateBalanceDisplay();
+        renderTransactions();
+        renderLoadout();
+        renderGoals();
+        renderCalendar();
+        startUptimeCounter();
+        
+        // Recuperar profile
+        const savedAvatar = localStorage.getItem('hcaav_avatar');
+        if(savedAvatar) document.getElementById('profile-img').src = savedAvatar;
+        
+        const savedStatus = localStorage.getItem('hcaav_status');
+        if(savedStatus) document.getElementById('profile-status').value = savedStatus;
+
+        // Auto-save do status quando o usuário digita
+        document.getElementById('profile-status').addEventListener('input', (e) => {
+            localStorage.setItem('hcaav_status', e.target.value);
+        });
+    }
+
+    // --- NAVEGAÇÃO DE ABAS ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function changeAvatar() {
+        const url = prompt("Cole o link da nova imagem de perfil:");
+        if (url) {
+            document.getElementById('profile-img').src = url;
+            localStorage.setItem('hcaav_avatar', url);
+        }
+    }
+
+    // --- UPTIME SIMULATOR (PERSISTENTE) ---
+    function startUptimeCounter() {
+        const display = document.getElementById('uptime-display');
+        
+        const updateDisplay = () => {
+            let h = Math.floor(uptimeSeconds / 3600);
+            let m = Math.floor((uptimeSeconds % 3600) / 60);
+            display.innerText = `${h}h ${m}m`;
+        };
+
+        updateDisplay();
+
+        setInterval(() => {
+            uptimeSeconds += 60; // Soma 1 minuto a cada 60s reais
+            localStorage.setItem('hcaav_uptime', uptimeSeconds);
+            updateDisplay();
+        }, 60000);
+    }
+
+    // --- CALENDÁRIO ---
+    function renderCalendar() {
+        const date = new Date();
+        const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+        
+        document.getElementById('month-year').innerText = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+        
+        const grid = document.getElementById('calendar-days');
+        grid.innerHTML = '';
+        
+        dayNames.forEach(day => { grid.innerHTML += `<div class="cal-day-name">${day}</div>`; });
+
+        const firstDayIndex = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        
+        for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
+
+        for (let i = 1; i <= lastDay; i++) {
+            const isToday = i === date.getDate() ? 'today' : '';
+            grid.innerHTML += `<div class="cal-day ${isToday}">${i}</div>`;
+        }
+    }
+
+    // --- LOGÍSTICA / FINANÇAS ---
+    function updateBalanceDisplay() {
+        document.getElementById('current-balance').innerText = balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        localStorage.setItem('hcaav_balance', balance);
+        renderGoals(); // Atualiza as barras de progresso sempre que o saldo muda
+    }
+
+    function addTransaction(type) {
+        const desc = document.getElementById('desc').value;
+        const valInput = document.getElementById('val').value;
+        const qtd = document.getElementById('qtd').value;
+        const val = parseFloat(valInput);
+
+        if(!desc || isNaN(val)) { alert("Preencha a descrição e o valor numérico."); return; }
+
+        balance += type === 'income' ? val : -val;
+        
+        transactions.unshift({
+            desc: desc,
+            cat: qtd || 'Geral',
+            val: val,
+            type: type
+        });
+
+        localStorage.setItem('hcaav_transactions', JSON.stringify(transactions));
+        
+        updateBalanceDisplay();
+        renderTransactions();
+
+        document.getElementById('desc').value = '';
+        document.getElementById('val').value = '';
+        document.getElementById('qtd').value = '';
+    }
+
+    function renderTransactions() {
+        const list = document.getElementById('t-list');
+        list.innerHTML = '';
+        
+        transactions.forEach((t) => {
+            const sign = t.type === 'income' ? '+' : '-';
+            const cssClass = t.type === 'income' ? 'pos' : 'neg';
+
+            list.innerHTML += `
+                <div class="transaction-item">
+                    <div class="t-info">
+                        <span class="t-title">${t.desc}</span>
+                        <span class="t-cat">${t.cat}</span>
+                    </div>
+                    <div class="t-val ${cssClass}">${sign} R$ ${t.val.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                </div>
+            `;
+        });
+    }
+
+    function clearTransactions() {
+        if(confirm("Tem certeza que deseja limpar o histórico de transações? O Fundo Operacional continuará o mesmo.")) {
+            transactions = [];
+            localStorage.setItem('hcaav_transactions', JSON.stringify(transactions));
+            renderTransactions();
+        }
+    }
+
+    // --- OBJETIVOS (METAS) ---
+    function toggleGoalForm() {
+        document.getElementById('goal-form').classList.toggle('active');
+    }
+
+    function renderGoals() {
+        const container = document.getElementById('goals-container');
+        container.innerHTML = '';
+
+        if(goals.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#757575; font-size: 0.8rem;">Nenhum objetivo definido.</p>`;
+            return;
+        }
+
+        goals.forEach((goal, index) => {
+            let progressRaw = (balance / goal.target) * 100;
+            if (progressRaw < 0) progressRaw = 0;
+            let progressPercent = progressRaw > 100 ? 100 : progressRaw.toFixed(1);
+
+            container.innerHTML += `
+                <div class="goal-card">
+                    <div class="goal-header">
+                        <span class="goal-title">${goal.name}</span>
+                        <button class="neo-button neo-button-danger" onclick="deleteGoal(${index})">X</button>
+                    </div>
+                    <div class="goal-values">
+                        R$ ${balance.toLocaleString('pt-BR', {minimumFractionDigits: 2})} / R$ ${goal.target.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                        <span style="float: right; color: var(--text-main); font-weight: bold;">${progressPercent}%</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function addNewGoal() {
+        const name = document.getElementById('goal-name').value;
+        const target = parseFloat(document.getElementById('goal-price').value);
+
+        if(!name || isNaN(target) || target <= 0) {
+            alert("Preencha o nome do objetivo e um valor válido.");
+            return;
+        }
+
+        goals.push({ name: name, target: target });
+        localStorage.setItem('hcaav_goals', JSON.stringify(goals));
+        
+        renderGoals();
+        
+        document.getElementById('goal-name').value = '';
+        document.getElementById('goal-price').value = '';
+        toggleGoalForm();
+    }
+
+    function deleteGoal(index) {
+        if(confirm("Excluir este objetivo?")) {
+            goals.splice(index, 1);
+            localStorage.setItem('hcaav_goals', JSON.stringify(goals));
+            renderGoals();
+        }
+    }
+
+    // --- SISTEMA DE LOADOUT ---
+    function toggleAddItemForm() {
+        document.getElementById('add-form').classList.toggle('active');
+    }
+
+    function renderLoadout() {
+        const container = document.getElementById('loadout-container');
+        container.innerHTML = '';
+
+        loadoutItems.forEach((item, index) => {
+            container.innerHTML += `
+                <div class="slot">
+                    <div class="slot-icon">${item.slot.substring(0,4)}</div>
+                    <div class="slot-details">
+                        <input type="text" value="${item.name}" readonly>
+                        <div class="category">Cat: ${item.category} / Valor: R$ ${item.price}</div>
+                    </div>
+                    <button class="neo-button neo-button-danger" onclick="deleteItem(${index})">X</button>
+                </div>
+            `;
+        });
+    }
+
+    function deleteItem(index) {
+        loadoutItems.splice(index, 1);
+        localStorage.setItem('hcaav_loadout', JSON.stringify(loadoutItems));
+        renderLoadout();
+    }
+
+    function addNewItem() {
+        const slot = document.getElementById('new-slot').value.toUpperCase() || 'ITEM';
+        const name = document.getElementById('new-name').value || 'Item Desconhecido';
+        const cat = document.getElementById('new-cat').value || 'Geral';
+        const price = document.getElementById('new-price').value || 0;
+
+        loadoutItems.push({ slot, name, category: cat, price });
+        localStorage.setItem('hcaav_loadout', JSON.stringify(loadoutItems));
+        
+        renderLoadout();
+        
+        document.getElementById('new-slot').value = '';
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-cat').value = '';
+        document.getElementById('new-price').value = '';
+        toggleAddItemForm();
+    }
+
+    // Roda a inicialização quando o navegador carregar o script
+    window.onload = init;
+
+</script>
+
+</body>
+</html>
